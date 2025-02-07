@@ -30,7 +30,7 @@ def player(board):
                 x_cnt+=1
             elif str(board[x][y]).lower() == 'o':
                 o_cnt+=1
-    return 'x' if x_cnt == o_cnt else 'o'
+    return 'X' if x_cnt == o_cnt else 'O'
     raise NotImplementedError
 
 
@@ -46,11 +46,19 @@ def actions(board):
     return actions
     raise NotImplementedError
 
+def action_valid(board, action):
+    if ((not (0 <= action[0] <= 2)) or ( not (0 <= action[1] <= 2))):
+        return False
+    if (board[action[0]][action[1]] != EMPTY):
+        return False
+    return True
 
 def result(board, action):
     """
     Returns the board that results from making move (i, j) on the board.
     """
+    if (not action_valid(board, action)):
+        raise NameError('Not a valid action')
     _player = player(board)
     new_board = [row[:] for row in board]
     new_board[action[0]][action[1]] = _player
@@ -67,7 +75,7 @@ def winner(board):
             return row[0]
     for col in range(3):
         if (board[0][col] == board[1][col] == board[2][col] and board[2][col] != EMPTY):
-            return row[0][col]
+            return board[0][col]
     if (board[0][0] == board[1][1] == board[2][2]):
         return board[0][0]
     if (board[2][0] == board[1][1] == board[0][2]):
@@ -116,7 +124,6 @@ def max_value(board):
         tmp = min_value(result(board=board, action=action))
         if (tmp > action_value):
             action_value = tmp
-        # print("max value")
     return action_value
 
 def min_value(board):
@@ -127,7 +134,6 @@ def min_value(board):
         tmp = max_value(result(board=board, action=action))
         if (tmp < action_value):
             action_value = tmp
-        # print("min value")
     return action_value
 
 def minimax(board):
@@ -157,15 +163,3 @@ def minimax(board):
                 best_action = action
     return best_action
     raise NotImplementedError
-
-# def main():
-#     board = initial_state()
-#     board[1][1] = 'x'
-#     board[0][1] = 'o'
-#     print(board)
-#     while (not terminal(board)):
-#         board = result(board=board, action=minimax(board))
-#     for row in board:
-#         print(row)
-#     # print(max_value(board))
-# main()
