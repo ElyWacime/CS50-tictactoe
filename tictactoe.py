@@ -66,7 +66,7 @@ def winner(board):
         if (row[0] != EMPTY and row[0] == row[1] == row[2]):
             return row[0]
     for col in range(3):
-        if (row[0][col] == row[1][col] == row[2][col] and row[2][col] != EMPTY):
+        if (board[0][col] == board[1][col] == board[2][col] and board[2][col] != EMPTY):
             return row[0][col]
     if (board[0][0] == board[1][1] == board[2][2]):
         return board[0][0]
@@ -110,53 +110,62 @@ def utility(board):
 
 def max_value(board):
     action_value = -2
+    if (terminal(board)):
+        return utility(board)
     for action in actions(board=board):
         tmp = min_value(result(board=board, action=action))
         if (tmp > action_value):
             action_value = tmp
+        # print("max value")
     return action_value
 
 def min_value(board):
     action_value = 2
+    if (terminal(board)):
+        return utility(board)
     for action in actions(board=board):
         tmp = max_value(result(board=board, action=action))
         if (tmp < action_value):
             action_value = tmp
+        # print("min value")
     return action_value
 
 def minimax(board):
     """
     Returns the optimal action for the current player on the board.
     """
-    # if (terminal(board)):
-    #     return None
-    # print(actions(board))
-    # return 0
-    board = initial_state()
-    move = (0, 0)  # Example move
-    new_board = result(board, move)
-    print(new_board)
-    # current_player = player(board).lower()
-    # actions_value_map = {}
-    # for action in actions(board):
-    #     if (current_player == 'x'):
-    #         actions_value_map[action] = max_value(board)
-    #     else:
-    #         actions_value_map[action] = min_value(board)
-    # ret = (-4, -4)
-    # if (current_player == 'x'):
-    #     tmp = -2
-    #     for action in actions_value_map:
-    #         if (actions_value_map[action] > tmp):
-    #             tmp = actions_value_map
-    #             ret = action
-    # if (current_player == 'o'):
-    #     tmp = 2
-    #     for action in actions_value_map:
-    #         if (actions_value_map[action] < tmp):
-    #             tmp = actions_value_map
-    #             ret = action
-    # print(f"#########{ret}#########\n\n\n\n\n\n")
-    # return ret
-    return move
+    if (terminal(board)):
+        return None
+    current_player = player(board).lower()
+    _actions = actions(board)
+    best_action = None
+
+    if (current_player == 'x'):
+        value = -2
+        for action in _actions:
+            current_value = min_value(result(board=board, action=action))
+            if (current_value > value):
+                value = current_value
+                best_action = action
+
+    if (current_player == 'o'):
+        value = 2
+        for action in _actions:
+            current_value = max_value(result(board=board, action=action))
+            if (current_value < value):
+                value = current_value
+                best_action = action
+    return best_action
     raise NotImplementedError
+
+# def main():
+#     board = initial_state()
+#     board[1][1] = 'x'
+#     board[0][1] = 'o'
+#     print(board)
+#     while (not terminal(board)):
+#         board = result(board=board, action=minimax(board))
+#     for row in board:
+#         print(row)
+#     # print(max_value(board))
+# main()
