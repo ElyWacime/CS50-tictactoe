@@ -24,11 +24,11 @@ def player(board):
     """
     x_cnt = 0
     o_cnt = 0
-    for x in len(board):
-        for y in len(board[x]):
-            if board[x][y].lower() == 'x':
+    for x in range(len(board)):
+        for y in range(len(board[x])):
+            if str(board[x][y]).lower() == 'x':
                 x_cnt+=1
-            elif board[x][y].lower() == 'o':
+            elif str(board[x][y]).lower() == 'o':
                 o_cnt+=1
     if (x_cnt == 0):
         return 'x'
@@ -41,9 +41,9 @@ def actions(board):
     Returns set of all possible actions (i, j) available on the board.
     """
     actions = []
-    for x in len(board):
-        for y in len(board[x]):
-            if board[x][y].lower() == EMPTY:
+    for x in range(len(board)):
+        for y in range(len(board[x])):
+            if str(board[x][y]).lower() == EMPTY:
                 actions.append((x, y))
     return actions
     raise NotImplementedError
@@ -53,8 +53,9 @@ def result(board, action):
     """
     Returns the board that results from making move (i, j) on the board.
     """
-    player = player(board)
-    board[action[0]][action[1]] = player.upper()
+    _player = player(board)
+    board[action[0]][action[1]] = str(_player).upper()
+    return board
     raise NotImplementedError
 
 
@@ -80,9 +81,9 @@ def terminal(board):
     """
     Returns True if game is over, False otherwise.
     """
-    for x in len(board):
-        for y in len(board[x]):
-            if board[x][y].lower() == EMPTY:
+    for x in range(len(board)):
+        for y in range(len(board[x])):
+            if board[x][y] == EMPTY:
                 return False
     return True
     raise NotImplementedError
@@ -94,37 +95,60 @@ def utility(board):
     """
     for row in board:
         if (row[0] != EMPTY and row[0] == row[1] == row[2]):
-            return (row[0].lower() == 'x') - (row[0].lower() == 'o')
+            return (str(row[0]).lower() == 'x') - (str(row[0]).lower() == 'o')
     for col in range(3):
         if (row[0][col] == row[1][col] == row[2][col] and row[2][col] != EMPTY):
-            return (row[0][col].lower() == 'x') - (row[0][col].lower() == 'o')
+            return (str(row[0][col]).lower() == 'x') - (str(row[0][col]).lower() == 'o')
     if (board[0][0] == board[1][1] == board[2][2]):
-        return (row[0][0].lower() == 'x') - (row[0][0].lower() == 'o')
+        return (str(row[0][0]).lower() == 'x') - (str(row[0][0]).lower() == 'o')
     if (board[2][0] == board[1][1] == board[0][2]):
-        return (row[2][0].lower() == 'x') - (row[2][0].lower() == 'o')
+        return (str(row[2][0]).lower() == 'x') - (str(row[2][0]).lower() == 'o')
     return 0
     raise NotImplementedError
 
 
-def maximizer(board):
-    actions = actions(board)
-    for action in actions:
-        if (utility((result(board, action))) == 1):
-            return action
-        if (not terminal(result(board, action))):
-            return maximizer(minimizer(result(board, action)))
-                
+def max_value(board):
+    action_value = -2
+    for action in actions(board=board):
+        tmp = min_value(result(action=action, board=board))
+        if (tmp > action_value):
+            action_value = tmp
+    return action_value
 
-def minimizer(board):
-    actions = actions(board)
-    for action in actions:
-        if (utility((result(board, action))) == -1):
-            return action
-        else:
-            return minimizer(maximizer(result(board, action)))
+def min_value(board):
+    action_value = 2
+    for action in actions(board=board):
+        tmp = max_value(result(action=action, board=board))
+        if (tmp < action_value):
+            action_value = tmp
+    return action_value
 
 def minimax(board):
     """
     Returns the optimal action for the current player on the board.
     """
+    if (terminal(board)):
+        return None
+    current_player = player(board).lower()
+    actions_value_map = {}
+    for action in actions(board):
+        if (current_player == 'x'):
+            actions_value_map[action] = max_value(board)
+        else:
+            actions_value_map[action] = min_value(board)
+    ret = (-4, -4)
+    if (current_player == 'x'):
+        tmp = -2
+        for action in actions_value_map:
+            if (actions_value_map[action] > tmp):
+                tmp = actions_value_map
+                ret = action
+    if (current_player == 'o'):
+        tmp = 2
+        for action in actions_value_map:
+            if (actions_value_map[action] < tmp):
+                tmp = actions_value_map
+                ret = action
+    print(f"#########{ret}#########\n\n\n\n\n\n")
+    return ret
     raise NotImplementedError
